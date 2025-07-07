@@ -729,15 +729,29 @@ jobs:
       - name: Deploy OXM Orchestrator Profile
         id: deploy-oxm-profile
         uses: ./.github/actions/deploy_on_prem
+        env:
+          TF_VAR_en_http_proxy: "https://192.168.99.20:8080"
+          TF_VAR_en_https_proxy: "https://192.168.99.20:8080"
         with:
           orch_version: ${{ github.event.pull_request.head.sha }}
           orch_profile: onprem-oxm
           docker_username: ${{ secrets.SYS_DOCKERHUB_USERNAME }}
           docker_password: ${{ secrets.SYS_DOCKERHUB_RO }}
 
-      # TODO: replace with deployment job and add test:onboarding
       - name: Create MT Sample Org and Project with default users
         run: mage tenantUtils:createDefaultMtSetup
+
+      - name: Test Edge Node onboarding
+        env:
+          E2E_SVC_DOMAIN: cluster.onprem
+          EDGE_CLUSTER_NAME: test-cluster
+        timeout-minutes: 20
+        if: |
+          needs.check-changed-files.outputs.onboarding == 'true' ||
+          needs.check-changed-files.outputs.on-prem == 'true' ||
+          needs.check-changed-files.outputs.orch == 'true' ||
+          needs.check-changed-files.outputs.ci == 'true'
+        run: mage test:onboarding
 
   tag-repo:
     permissions:

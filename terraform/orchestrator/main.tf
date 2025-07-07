@@ -30,11 +30,13 @@ resource "local_file" "proxy_config_file" {
   content = templatefile(
     "${path.module}/templates/proxy_config.tftpl",
     {
-      http_proxy  = var.http_proxy,
-      https_proxy = var.https_proxy,
-      no_proxy    = var.no_proxy,
-      ftp_proxy   = var.ftp_proxy,
-      socks_proxy = var.socks_proxy,
+      http_proxy     = var.http_proxy,
+      https_proxy    = var.https_proxy,
+      no_proxy       = var.no_proxy,
+      ftp_proxy      = var.ftp_proxy,
+      socks_proxy    = var.socks_proxy,
+      en_http_proxy  = var.en_http_proxy,
+      en_https_proxy = var.en_https_proxy,
     },
   )
   filename = "${path.module}/files/proxy_config.yaml"
@@ -309,8 +311,8 @@ resource "null_resource" "copy_local_orch_installer" {
   }
 
   provisioner "file" {
-    source      = "../../${var.working_directory}/${var.local_repo_archives_path}/onpremFull_edge-manageability-framework_${split("\n",data.local_file.version_file.content)[0]}.tgz"
-    destination = "/home/ubuntu/repo_archives/onpremFull_edge-manageability-framework_${split("\n",data.local_file.version_file.content)[0]}.tgz"
+    source      = "../../${var.working_directory}/${var.local_repo_archives_path}/onpremFull_edge-manageability-framework_${split("\n", data.local_file.version_file.content)[0]}.tgz"
+    destination = "/home/ubuntu/repo_archives/onpremFull_edge-manageability-framework_${split("\n", data.local_file.version_file.content)[0]}.tgz"
   }
 }
 
@@ -364,7 +366,7 @@ resource "null_resource" "set_proxy_config" {
       "set -o errexit",
       "cp /home/ubuntu/proxy_config.yaml /home/ubuntu/repo_archives/tmp/edge-manageability-framework/orch-configs/profiles/proxy-none.yaml",
       "cat /home/ubuntu/repo_archives/tmp/edge-manageability-framework/orch-configs/profiles/proxy-none.yaml",
-     ]
+    ]
     when = create
   }
 }
